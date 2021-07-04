@@ -1,11 +1,12 @@
 FROM debian:buster
 MAINTAINER Carles Amigó, fr3nd@fr3nd.net
 
-ENV MOTION_VERSION 4.3.1
-ENV MOTIONEYE_VERSION 0.42.1
+ENV MOTION_VERSION 4.3.2
+ENV MOTIONEYE_VERSION 795616d
 
 RUN apt-get update && DEBIAN_FRONTEND="noninteractive" apt-get install -y \
       curl \
+      git \
       ffmpeg \
       libcurl4-openssl-dev \
       libjpeg-dev \
@@ -30,10 +31,13 @@ RUN curl -o /tmp/motion.deb -L https://github.com/Motion-Project/motion/releases
       dpkg -i /tmp/motion.deb && \
       rm -f /tmp/motion.deb
 
-RUN pip install motioneye==0.42.1 && \
+RUN git clone https://github.com/ccrisan/motioneye.git /var/src/motioneye && \
+      git --git-dir /var/src/motioneye/.git checkout $MOTIONEYE_VERSION && \
+      pip install /var/src/motioneye && \
       mkdir -p /etc/motioneye && \
       mkdir -p /var/lib/motioneye && \
-      cp /usr/local/share/motioneye/extra/motioneye.conf.sample /etc/motioneye/motioneye.conf
+      cp /usr/local/share/motioneye/extra/motioneye.conf.sample /etc/motioneye/motioneye.conf && \
+      rm -rf /var/src/motioneye
 
 VOLUME /etc/motioneye
 VOLUME /var/lib/motioneye
